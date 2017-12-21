@@ -2,7 +2,7 @@ from PIL import Image
 from feature import NPDFeature
 from ensemble import AdaBoostClassifier
 from sklearn import tree
-import pickle
+from sklearn.metrics import classification_report
 import os
 import numpy as np
 
@@ -36,9 +36,9 @@ if __name__ == "__main__":
 
     #cal NPD && save
 
-     for i in range(num_face+num_nonface):
-         NPD.append(NPDFeature(imgs[i]).extract())
-     clf.save(NPD,'output')
+    # for i in range(num_face+num_nonface):
+    #     NPD.append(NPDFeature(imgs[i]).extract())
+    # clf.save(NPD,'output')
 
 
     # load NPD
@@ -48,12 +48,18 @@ if __name__ == "__main__":
     train_y=np.append(np.ones((1,100)),np.linspace(-1,-1,100))
     test_x=np.row_stack((NPD[200:300],NPD[700:800]))
     test_y = np.append(np.ones((1, 100)), np.linspace(-1, -1, 100))
+
     clf.fit(train_x, train_y)
-    p=clf.predict(test_x)
-    print(p)
+    y=clf.predict(test_x)
 
+    hit=0
+    for i in range(test_x.shape[0]):
+        if (y[i]==test_y[i]):
+            hit+=1
+    print(hit/test_x.shape[0])
 
-
+    with open('report.txt','w') as f:
+        f.write(classification_report(test_y, y))
 
 
 
