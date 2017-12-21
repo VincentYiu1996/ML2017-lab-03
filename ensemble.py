@@ -1,4 +1,5 @@
 import pickle
+import numpy as np
 
 class AdaBoostClassifier:
     '''A simple AdaBoost Classifier.'''
@@ -10,7 +11,8 @@ class AdaBoostClassifier:
             weak_classifier: The class of weak classifier, which is recommend to be sklearn.tree.DecisionTreeClassifier.
             n_weakers_limit: The maximum number of weak classifier the model can use.
         '''
-        pass
+        self.weak_classifier=weak_classifier
+        self.n_weakers_limit=n_weakers_limit
 
     def is_good_enough(self):
         '''Optional'''
@@ -23,7 +25,34 @@ class AdaBoostClassifier:
             X: An ndarray indicating the samples to be trained, which shape should be (n_samples,n_features).
             y: An ndarray indicating the ground-truth labels correspond to X, which shape should be (n_samples,1).
         '''
-        pass
+        self.w=np.ones(X.shape[0])/X.shape[0]
+        # self.clf.fit(X,y,sample_weight=self.w)
+        self.clf=[]
+        self.error=[]
+        self.alpha=[]
+
+        #基本类器
+        for i in range(4):
+            self.clf.append(self.weak_classifier(max_depth=self.n_weakers_limit))
+            # print(self.w)
+            self.clf[i].fit(X, y, sample_weight=self.w)
+
+            #calc error
+            e=0
+            G=self.clf[i].predict(X)
+            for j in range(X.shape[0]):
+                if G[j] != y[j]:
+                    e += self.w[j]
+            print(e)
+            self.error.append(e/X.shape[0])
+
+            self.alpha.append(0.5*np.log((1-self.error[i])/self.error[i]))
+            Z=0
+            for j in range(X.shape[0]):
+                Z+=self.w[j]*np.exp(-self.alpha[i]*y[j]*G[j])
+
+            self.w=self.w/Z*np.exp(-self.alpha[i]*y[j]*G[j])
+
 
 
     def predict_scores(self, X):
@@ -47,7 +76,11 @@ class AdaBoostClassifier:
         Returns:
             An ndarray consists of predicted labels, which shape should be (n_samples,1).
         '''
-        pass
+        G=0
+        for i in range(4):
+            G+=self.alpha[i]*self.clf[i].predict(X)
+        return np.sign(G)
+
 
     @staticmethod
     def save(model, filename):
