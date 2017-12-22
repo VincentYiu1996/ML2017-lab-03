@@ -28,13 +28,12 @@ class AdaBoostClassifier:
         self.w=np.ones(X.shape[0])/X.shape[0]
         # self.clf.fit(X,y,sample_weight=self.w)
         self.clf=[]
-        self.num=10
         self.error=[]
         self.alpha=[]
 
         #基本类器
-        for i in range(self.num):
-            self.clf.append(self.weak_classifier(max_depth=self.n_weakers_limit))
+        for i in range(self.n_weakers_limit):
+            self.clf.append(self.weak_classifier(max_depth=3))
             # print(self.w)
             self.clf[i].fit(X, y, sample_weight=self.w)
 
@@ -65,7 +64,7 @@ class AdaBoostClassifier:
             An one-dimension ndarray indicating the scores of differnt samples, which shape should be (n_samples,1).
         '''
         score=0
-        for i in range(self.num):
+        for i in range(self.n_weakers_limit):
             score+=self.alpha[i]*self.clf[i].predict(X)
         return score
 
@@ -80,7 +79,7 @@ class AdaBoostClassifier:
             An ndarray consists of predicted labels, which shape should be (n_samples,1).
         '''
         G=0
-        for i in range(self.num):
+        for i in range(self.n_weakers_limit):
             G+=self.alpha[i]*self.clf[i].predict(X)
 
 

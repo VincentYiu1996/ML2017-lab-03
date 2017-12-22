@@ -32,17 +32,18 @@ if __name__ == "__main__":
         imgs.append(np.array(im))
         # train_y.append(-1)
 
-    clf = AdaBoostClassifier(tree.DecisionTreeClassifier, 3)
+    clf = AdaBoostClassifier(tree.DecisionTreeClassifier, 10)
 
-    #cal NPD && save
+    #cal NPD
+    for i in range(num_face+num_nonface):
+        NPD.append(NPDFeature(imgs[i]).extract())
 
-    # for i in range(num_face+num_nonface):
-    #     NPD.append(NPDFeature(imgs[i]).extract())
+    #save NPD
     # clf.save(NPD,'output')
 
 
-    # load NPD
-    NPD=np.array(clf.load('output'))
+    #load NPD
+    # NPD=np.array(clf.load('output'))
 
     train_x=np.row_stack((NPD[0:100],NPD[500:600]))
     train_y=np.append(np.ones((1,100)),np.linspace(-1,-1,100))
@@ -56,7 +57,7 @@ if __name__ == "__main__":
     for i in range(test_x.shape[0]):
         if (y[i]==test_y[i]):
             hit+=1
-    print(hit/test_x.shape[0])
+    print("hit rate:",hit/test_x.shape[0])
 
     with open('report.txt','w') as f:
         f.write(classification_report(test_y, y))
